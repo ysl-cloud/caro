@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>나의 커리어로드맵 워크시트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* layout idea: left step navigation + one worksheet section at a time, final page is the printable result sheet */
+:root{
+  --bg:#f4f6fb; --surface:#ffffff; --tint:#eef2fa; --text:#1b2030; --muted:#6a7287; --line:#dfe4ee;
+  --accent:#1e3f8f; --accent-ink:#ffffff; --warn:#b03a2e; --ok:#1f7a4d;
+  --font:'Noto Sans KR','Malgun Gothic','맑은 고딕',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1320; --surface:#161c2c; --tint:#1d2640; --text:#e7eaf3; --muted:#98a1b8; --line:#2a3350;
+    --accent:#5b82e0; --accent-ink:#ffffff; --warn:#e07a6c; --ok:#5cc08d; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1320; --surface:#161c2c; --tint:#1d2640; --text:#e7eaf3; --muted:#98a1b8; --line:#2a3350;
+  --accent:#5b82e0; --accent-ink:#ffffff; --warn:#e07a6c; --ok:#5cc08d; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header.top{background:var(--accent);color:var(--accent-ink);padding:14px 20px}
+header.top .in{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:6px 24px;align-items:baseline;justify-content:space-between}
+header.top b{font-size:18px;letter-spacing:-.01em}
+header.top span{font-size:12.5px;opacity:.88}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px;align-items:start}
+nav.steps{position:sticky;top:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px}
+nav.steps .meter{height:6px;background:var(--tint);border-radius:3px;overflow:hidden;margin:4px 4px 10px}
+nav.steps .meter i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+nav.steps .pct{font-size:12px;color:var(--muted);margin:0 4px 6px}
+nav.steps button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;text-align:left;background:none;border:0;border-radius:7px;padding:8px 10px;cursor:pointer;font-size:14px}
+nav.steps button:hover{background:var(--tint)}
+nav.steps button[aria-current="step"]{background:var(--accent);color:var(--accent-ink)}
+nav.steps button small{font-size:11.5px;opacity:.85;white-space:nowrap}
+main{min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:22px 24px;margin-bottom:16px}
+.eyebrow{font-size:12.5px;font-weight:700;color:var(--accent);margin:0 0 2px}
+h1{font-size:24px;margin:0 0 6px;letter-spacing:-.015em;text-wrap:balance}
+h2{font-size:16px;margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--accent);text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 4px;font-size:14px;max-width:70ch}
+.field{margin:0 0 16px}
+.field>label,.field>.lab{display:block;font-weight:500;margin-bottom:5px;font-size:14px}
+.field .sub{display:block;color:var(--muted);font-weight:400;font-size:12.5px}
+input[type=text],textarea,select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:8px 10px}
+textarea{resize:vertical;min-height:72px}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+.list .row{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px}
+.list .row b{flex:0 0 22px;color:var(--accent);padding-top:8px;text-align:right}
+.rate{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.rate button{width:42px;height:38px;border:1px solid var(--line);background:var(--surface);border-radius:7px;cursor:pointer;font-weight:500}
+.rate button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.rate .end{font-size:12px;color:var(--muted)}
+.chk{display:flex;flex-wrap:wrap;gap:8px}
+.chk label{display:flex;gap:7px;align-items:center;border:1px solid var(--line);border-radius:7px;padding:7px 12px;cursor:pointer;background:var(--surface)}
+.chk label:has(input:checked){background:var(--tint);border-color:var(--accent)}
+.gridwrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin-bottom:16px}
+table.g{border-collapse:collapse;width:100%;min-width:620px}
+table.g th,table.g td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:6px;vertical-align:top;text-align:left}
+table.g th{background:var(--tint);font-size:13px;font-weight:700}
+table.g tr>*:last-child{border-right:0}
+table.g tr:last-child td{border-bottom:0}
+table.g td.rowh{background:var(--tint);font-weight:500;font-size:13.5px;min-width:110px}
+table.g textarea{min-height:56px;border:0;padding:4px;background:transparent}
+table.g input,table.g select{border:0;padding:4px;background:transparent}
+.gapnum{font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.nav2{display:flex;justify-content:space-between;gap:10px;margin-top:22px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:9px 18px;cursor:pointer;font-weight:500}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.small{padding:6px 12px;font-size:13px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.note{background:var(--tint);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--muted);margin:10px 0}
+.msg{font-size:13px;color:var(--ok);min-height:20px;margin-top:6px}
+.msg.err{color:var(--warn)}
+.prompt{border:1px solid var(--line);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.prompt .ph{display:flex;justify-content:space-between;align-items:center;background:var(--tint);padding:6px 12px;font-weight:700;font-size:13px}
+.prompt pre{margin:0;padding:10px 12px;white-space:pre-wrap;word-break:keep-all;font-family:var(--font);font-size:14px}
+.paper{background:#fff;color:#1b2030;border:1px solid var(--line);border-radius:6px;padding:28px 30px;overflow-x:auto}
+@media (max-width:820px){
+  .wrap{grid-template-columns:1fr;gap:12px}
+  nav.steps{position:static;display:flex;overflow-x:auto;gap:4px;padding:8px}
+  nav.steps .meter,nav.steps .pct{display:none}
+  nav.steps button{width:auto;flex:0 0 auto;white-space:nowrap}
+  .card{padding:18px 16px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style id="rcss"></style>
+</head>
+<body>
+<header class="top"><div class="in"><b>나의 커리어로드맵 워크시트</b><span>eDISC 기반 맞춤형 취업전략 설계 · 대학생 커리어로드맵 워크숍</span></div></header>
+<div class="wrap">
+  <nav class="steps" id="nav" aria-label="워크시트 단계"></nav>
+  <main id="main"></main>
+</div>
+<script>
+'use strict';
+const R=n=>[...Array(n).keys()];
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const STORE='roadmap-ws-v1';
+
+/* ---------- 워크시트 구조 ---------- */
+const SECT=[
+{id:'basic',nav:'기본 정보',tag:'시작',title:'나의 기본 정보',lead:'이름과 전공을 입력하면 결과지와 AI 프롬프트에 자동으로 들어갑니다.',blocks:[{t:'f',items:[
+ {k:'name',l:'이름',type:'text',ph:'예) 홍길동'},
+ {k:'major',l:'학과',type:'text',ph:'예) 경영학과'},
+ {k:'grade',l:'학년',type:'sel',opts:['1학년','2학년','3학년','4학년']}]}]},
+{id:'warm',nav:'WARM-UP',tag:'WARM-UP',title:'나의 겨울방학 목표',lead:'등산에 비유해 지금의 나를 솔직하게 표시해 보세요.',blocks:[{t:'f',items:[
+ {k:'w_goal',l:'올해 내가 세웠던 목표와 달성 여부',type:'area'},
+ {k:'w_winter',l:'이번 겨울방학에 꼭 이루고 싶은 것',type:'area'},
+ {k:'w_first',l:'지금 당장 이번 주에 할 수 있는 첫 행동 1개',type:'text'}]},
+ {t:'h',title:'내 등산력 체크 (1 낮음 ~ 5 높음)'},
+ {t:'f',items:[
+ {k:'c_self',l:'내 등산력: 자기이해 (나를 아는 정도)',type:'rate'},
+ {k:'c_goal',l:'정상: 진로목표 (가야 할 곳)',type:'rate'},
+ {k:'c_env',l:'코스 지도: 직무·환경 이해 (가는 길)',type:'rate'},
+ {k:'c_act',l:'오늘의 한 걸음: 실행 계획',type:'rate'}]}]},
+{id:'s1',nav:'STEP 1 자기이해',tag:'STEP 1',title:'자기이해',lead:'eDISC 결과지를 보며 채워 보세요.',blocks:[{t:'f',items:[
+ {k:'edisc',l:'나의 유형 코드',type:'text',ph:'예) IC'},
+ {k:'animal',l:'대표 이미지',type:'sel',opts:['사자','공작새','올빼미','돌고래']},
+ {k:'strong',l:'나의 강점 3가지',type:'list',n:3},
+ {k:'weak',l:'보완하면 좋은 점 3가지',type:'list',n:3}]}]},
+{id:'s2',nav:'STEP 2 진로목표',tag:'STEP 2',title:'진로목표',lead:'관심산업을 찾고, 산업·기업·직무를 한 줄로 정리합니다.',blocks:[{t:'h',title:'관심산업 찾기 (겹쳐 보기)'},{t:'f',items:[
+ {k:'like',l:'① 내가 좋아하는 것',type:'area'},
+ {k:'senior',l:'② 내 전공 선배가 가는 곳',type:'area'},
+ {k:'daily',l:'③ 일상에서 쓰는 것',type:'area'},
+ {k:'kw',l:'겹치는 공통 키워드',type:'text'},
+ {k:'indc',l:'관심산업 후보 3개',type:'list',n:3}]},
+ {t:'h',title:'나의 진로 목표'},{t:'f',items:[
+ {k:'t_ind',l:'산업',type:'text',ph:'예) 미디어·콘텐츠'},
+ {k:'t_co',l:'기업',type:'text'},
+ {k:'t_job',l:'직무',type:'text'},
+ {k:'smart',l:'SMART 목표 (언제까지, 무엇을, 어느 정도로)',type:'area',ph:'예) 2027년 상반기까지 ○○ 리포트 1건과 공모전 1회를 포함한 포트폴리오를 완성한다.'}]}]},
+{id:'s3',nav:'STEP 3 환경탐색',tag:'STEP 3',title:'환경탐색: 산업·기업·직무',lead:'조별 직무탐색 결과를 정리합니다. 확인되지 않은 수치는 비워 두고 출처를 찾아 채우세요.',blocks:[{t:'h',title:'eDISC 직무 매칭'},{t:'f',items:[
+ {k:'m_top',l:'매칭률 상위 직무 3개',type:'list',n:3},
+ {k:'m_low',l:'매칭률 하위 직무 3개',type:'list',n:3},
+ {k:'co',l:'관심 기업',type:'text'},
+ {k:'co_jobs',l:'기업의 직무 종류',type:'area'}]},
+ {t:'h',title:'직무 분석'},{t:'f',items:[
+ {k:'j_name',l:'탐색할 직무',type:'text'},
+ {k:'j_why',l:'선정 이유',type:'area'},
+ {k:'j_do',l:'하는 일 (주요 업무 5가지)',type:'list',n:5},
+ {k:'j_skill',l:'필요 역량 TOP 5 (지식·기술·태도 구분)',type:'list',n:5},
+ {k:'j_enter',l:'어떻게 들어가나? (전공·채용공고·전형)',type:'area'},
+ {k:'j_hard',l:'신입에게 어려운 점',type:'area'},
+ {k:'j_fit',l:'나와 맞는 점 1',type:'text'},
+ {k:'j_worry',l:'걱정되는 점 1',type:'text'}]},
+ {t:'h',title:'기업·산업 조사 (선택)'},{t:'f',items:[
+ {k:'co_val',l:'기업 인재상 키워드',type:'text'},
+ {k:'co_hire',l:'채용 일정 / 전형 과정',type:'area'},
+ {k:'co_news',l:'CEO 발언 · 뉴스 5건',type:'area'},
+ {k:'co_ratio',l:'신입 vs 경력 비율',type:'text'},
+ {k:'in_size',l:'시장 규모 · 성장률 (출처와 연도 함께)',type:'area'},
+ {k:'in_trend',l:'주요 트렌드 5가지',type:'area'},
+ {k:'in_ai',l:'AI · 규제 변화 영향',type:'area'},
+ {k:'in_future',l:'3년 후 전망',type:'area'}]}]},
+{id:'s4',nav:'STEP 4 역량 갭',tag:'STEP 4',title:'역량 갭 분석',lead:'직무가 요구하는 역량 TOP 5와 내가 지금 가진 역량을 비교합니다. 1은 낮음, 5는 높음입니다.',blocks:[{t:'gap'},{t:'f',items:[
+ {k:'g_focus',l:'이번 학기 최우선 액션 영역 (갭이 가장 큰 1~2개)',type:'area'}]}]},
+{id:'s5',nav:'STEP 5 경험·데이터',tag:'STEP 5',title:'경험 설계와 커리어 데이터',lead:'AI 진로경험 큐레이터에 넣을 값과, 현재 나의 커리어 데이터를 정리합니다.',blocks:[{t:'f',items:[
+ {k:'x_types',l:'내가 해 보고 싶은 경험 유형',type:'chk',opts:['교내 프로그램 / 동아리 / 스터디','자격증 / 어학 / 전공 심화 학습','봉사 · 대외활동','해외인턴 / 연수 / 어학연수','공모전 / 프로젝트']}]},
+ {t:'h',title:'큐레이터 입력 준비'},{t:'f',items:[
+ {k:'q_edisc',l:'eDISC 유형',type:'text'},
+ {k:'q_major',l:'전공 / 부전공',type:'text'},
+ {k:'q_job',l:'목표 직무',type:'text'},
+ {k:'q_skill',l:'보완하고 싶은 역량',type:'text'}]},
+ {t:'g',gk:'rec',title:'추천 경험',rows:['맞춤 경험 (강점을 살릴 수 있는)','보완 경험 (부족한 부분을 훈련)','확장 경험 (새로운 나를 발견)'],cols:['큐레이터가 추천한 경험','내가 찾은 경험 · 해 보고 싶은 이유']},
+ {t:'g',gk:'cd',title:'현재 나의 커리어 데이터 vs 목표',rows:['전공','전체평점 / 전공평점','해야 할 공부','공모전','자격증','대외활동','아르바이트','외국어 능력','기타 활동'],cols:['현재 나의 커리어 데이터','목표']}]},
+{id:'s6',nav:'AI 실습',tag:'AI 실습',title:'AI에게 물어보기',lead:'AI 답변은 그대로 믿지 말고 공식 자료로 확인한 뒤 메모하세요.',blocks:[{t:'g',gk:'ai',title:'AI 질문 예시와 검증 메모',rows:['산업: [학년] [전공]이야. 우리 전공에서 많이 가는 산업 3개 알려줘','기업: [산업] 중 매출액 기준 1~5위 기업 추천해줘','직무: [기업]에서 [전공]이 많이 가는 직무 3개 추천해줘'],cols:['답변 요약 · 검증 메모']},{t:'f',items:[
+ {k:'u_files',l:'AI에 업로드할 자료 준비 상태',type:'chk',opts:['워크시트 파일(결과지)','eDISC 결과지','직무분석 내용','경험']}]}]},
+{id:'s7',nav:'액션플랜',tag:'ACTION PLAN',title:'학년별 액션플랜',lead:'지난 학년은 한 일을 적고, 앞으로는 분기별로 구체화합니다. 이번 학기 안에 할 수 있는 작은 행동 3개는 마지막 칸에 적으세요.',blocks:[{t:'g',gk:'pl',title:'학년 / 학기별 계획',cols:['1학년','2학년','3학년','4학년'],rows:['시기별 목표','해야 할 공부','갖춰야 할 자격증','네트워킹 (인맥)','커뮤니티 활동','읽어야 할 책','필요 경비 충당 방법','기타 (이번 학기 작은 행동 3개)']}]},
+{id:'result',nav:'결과지',tag:'결과지',title:'나의 커리어로드맵 결과지',lead:'입력한 내용이 한 장의 결과지로 정리됩니다. 파일로 내려받아 AI에 업로드하세요.',blocks:[{t:'result'}]}
+];
+const GAP_N=5;
+const ST=SECT.filter(s=>s.id!=='result');
+
+/* ---------- 상태 ---------- */
+let D={};let cur=0;
+try{const s=localStorage.getItem(STORE);if(s)D=JSON.parse(s)||{};}catch(e){}
+function persist(){try{localStorage.setItem(STORE,JSON.stringify(D));}catch(e){}}
+const val=k=>{const v=D[k];return v==null?'':v};
+const has=v=>Array.isArray(v)?v.length>0:String(v==null?'':v).trim()!=='';
+
+/* 섹션별 키 목록 */
+function keysOf(sec){
+  const out=[];
+  sec.blocks.forEach(b=>{
+    if(b.t==='f')b.items.forEach(it=>{if(it.type==='list')R(it.n).forEach(i=>out.push(it.k+'_'+i));else out.push(it.k);});
+    if(b.t==='g')b.rows.forEach((_,r)=>b.cols.forEach((_,c)=>out.push(b.gk+'_'+r+'_'+c)));
+    if(b.t==='gap')R(GAP_N).forEach(i=>['name','need','cur','plan'].forEach(f=>out.push('gap_'+i+'_'+f)));
+  });
+  return out;
+}
+function pctOf(sec){const ks=keysOf(sec);if(!ks.length)return 0;return Math.round(ks.filter(k=>has(D[k])).length/ks.length*100);}
+
+/* ---------- 입력 화면 ---------- */
+function fieldHtml(it){
+  const lab=`<span class="lab">${esc(it.l)}</span>`;
+  if(it.type==='text')return `<div class="field"><label for="f_${it.k}">${esc(it.l)}</label><input type="text" id="f_${it.k}" data-k="${it.k}" value="${esc(val(it.k))}" placeholder="${esc(it.ph||'')}"></div>`;
+  if(it.type==='area')return `<div class="field"><label for="f_${it.k}">${esc(it.l)}</label><textarea id="f_${it.k}" data-k="${it.k}" placeholder="${esc(it.ph||'')}">${esc(val(it.k))}</textarea></div>`;
+  if(it.type==='sel')return `<div class="field"><label for="f_${it.k}">${esc(it.l)}</label><select id="f_${it.k}" data-k="${it.k}"><option value="">선택</option>${it.opts.map(o=>`<option${val(it.k)===o?' selected':''}>${esc(o)}</option>`).join('')}</select></div>`;
+  if(it.type==='list')return `<div class="field">${lab}<div class="list">${R(it.n).map(i=>`<div class="row"><b>${i+1}.</b><input type="text" id="f_${it.k}_${i}" data-k="${it.k}_${i}" value="${esc(val(it.k+'_'+i))}" aria-label="${esc(it.l)} ${i+1}"></div>`).join('')}</div></div>`;
+  if(it.type==='rate')return `<div class="field">${lab}<div class="rate" data-rate="${it.k}"><span class="end">낮음</span>${[1,2,3,4,5].map(n=>`<button type="button" data-rv="${n}" aria-pressed="${String(val(it.k))===String(n)}">${n}</button>`).join('')}<span class="end">높음</span></div></div>`;
+  if(it.type==='chk'){const a=Array.isArray(D[it.k])?D[it.k]:[];return `<div class="field">${lab}<div class="chk">${it.opts.map((o,i)=>`<label><input type="checkbox" data-ck="${it.k}" data-opt="${esc(o)}"${a.includes(o)?' checked':''}>${esc(o)}</label>`).join('')}</div></div>`;}
+  return '';
+}
+function gridHtml(b){
+  const head=`<tr><th>항목</th>${b.cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>`;
+  const rows=b.rows.map((r,ri)=>`<tr><td class="rowh">${esc(r)}</td>${b.cols.map((c,ci)=>`<td><textarea data-k="${b.gk}_${ri}_${ci}" aria-label="${esc(r+' '+c)}">${esc(val(b.gk+'_'+ri+'_'+ci))}</textarea></td>`).join('')}</tr>`).join('');
+  return `${b.title?`<h2>${esc(b.title)}</h2>`:''}<div class="gridwrap"><table class="g">${head}${rows}</table></div>`;
+}
+function gapHtml(){
+  const sel=(k)=>`<select data-k="${k}" aria-label="별점"><option value="">-</option>${[1,2,3,4,5].map(n=>`<option${String(val(k))===String(n)?' selected':''}>${n}</option>`).join('')}</select>`;
+  const rows=R(GAP_N).map(i=>`<tr><td class="rowh"><input type="text" data-k="gap_${i}_name" value="${esc(val('gap_'+i+'_name'))}" placeholder="역량 ${i+1}" aria-label="역량 ${i+1}"></td><td>${sel('gap_'+i+'_need')}</td><td>${sel('gap_'+i+'_cur')}</td><td class="gapnum" id="gapv_${i}">${gapVal(i)}</td><td><textarea data-k="gap_${i}_plan" aria-label="보완 방법 ${i+1}">${esc(val('gap_'+i+'_plan'))}</textarea></td></tr>`).join('');
+  return `<div class="gridwrap"><table class="g"><tr><th>직무 필요 역량</th><th>필요 수준 (1~5)</th><th>현재 수준 (1~5)</th><th>갭</th><th>보완 방법 (직접 작성)</th></tr>${rows}</table></div>`;
+}
+function gapVal(i){const n=+D['gap_'+i+'_need'],c=+D['gap_'+i+'_cur'];return(n&&c)?Math.max(0,n-c):'';}
+
+function renderNav(){
+  const done=ST.reduce((a,s)=>a+pctOf(s),0)/ST.length;
+  document.getElementById('nav').innerHTML=`<div class="pct">전체 작성률 ${Math.round(done)}%</div><div class="meter"><i style="width:${done}%"></i></div>`+SECT.map((s,i)=>`<button type="button" data-go="${i}"${i===cur?' aria-current="step"':''}><span>${esc(s.nav)}</span><small>${s.id==='result'?'':pctOf(s)+'%'}</small></button>`).join('');
+}
+function syncDefaults(){
+  const m=[['q_edisc',()=>val('edisc')],['q_major',()=>val('major')],['q_job',()=>val('t_job')||val('j_name')],['t_co',()=>val('co')],['t_job',()=>val('j_name')]];
+  m.forEach(([k,f])=>{if(!has(D[k])){const v=f();if(has(v))D[k]=v;}});
+}
+function renderMain(){
+  syncDefaults();
+  const s=SECT[cur];const m=document.getElementById('main');
+  let h=`<section class="card"><p class="eyebrow">${esc(s.tag)}</p><h1>${esc(s.title)}</h1><p class="lead">${esc(s.lead)}</p>`;
+  if(cur===0)h+=`<div class="note">입력한 내용은 이 브라우저에만 저장되고 서버로 전송되지 않습니다. 공용 컴퓨터에서는 마지막에 결과지를 내려받은 뒤 "입력 초기화"를 눌러 주세요.</div>`;
+  s.blocks.forEach(b=>{
+    if(b.t==='h')h+=`<h2>${esc(b.title)}</h2>`;
+    else if(b.t==='f')h+=b.items.map(fieldHtml).join('');
+    else if(b.t==='g')h+=gridHtml(b);
+    else if(b.t==='gap')h+=gapHtml();
+    else if(b.t==='result')h+=resultView();
+  });
+  if(cur===0)h+=`<div class="tools"><button type="button" class="btn ghost small" id="exBtn">작성 예시 불러오기 (가상 인물)</button><button type="button" class="btn ghost small" id="rsBtn">입력 초기화</button></div><div class="msg" id="msg0"></div>`;
+  h+=`<div class="nav2"><button type="button" class="btn ghost" data-step="-1"${cur===0?' disabled style="visibility:hidden"':''}>이전</button>${cur<SECT.length-1?`<button type="button" class="btn" data-step="1">${cur===SECT.length-2?'결과지 보기':'다음'}</button>`:''}</div></section>`;
+  m.innerHTML=h;window.scrollTo({top:0});
+  if(s.id==='result')bindResult();
+  renderNav();
+}
+
+/* ---------- 이벤트 ---------- */
+document.addEventListener('input',e=>{
+  const k=e.target.dataset&&e.target.dataset.k;if(!k)return;
+  D[k]=e.target.value;persist();
+  const m=k.match(/^gap_(\d)_(need|cur)$/);if(m){const el=document.getElementById('gapv_'+m[1]);if(el)el.textContent=gapVal(+m[1]);}
+  renderNav();
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset&&t.dataset.ck){const a=Array.isArray(D[t.dataset.ck])?D[t.dataset.ck].slice():[];const o=t.dataset.opt;const i=a.indexOf(o);if(t.checked&&i<0)a.push(o);if(!t.checked&&i>=0)a.splice(i,1);D[t.dataset.ck]=a;persist();renderNav();}
+});
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.go!=null){cur=+t.dataset.go;renderMain();return;}
+  if(t.dataset.step){cur=Math.max(0,Math.min(SECT.length-1,cur+(+t.dataset.step)));renderMain();return;}
+  if(t.dataset.rv){const k=t.parentElement.dataset.rate;D[k]=t.dataset.rv;persist();t.parentElement.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===t)));renderNav();return;}
+  if(t.id==='exBtn')return confirmTwice(t,'현재 입력이 사라집니다. 한 번 더 누르면 불러옵니다',()=>{D=Object.assign({},EX);persist();renderMain();});
+  if(t.id==='rsBtn')return confirmTwice(t,'모든 입력이 삭제됩니다. 한 번 더 누르면 초기화합니다',()=>{D={};persist();renderMain();});
+});
+function confirmTwice(btn,txt,fn){
+  if(btn.dataset.armed){fn();return;}
+  const old=btn.textContent;btn.dataset.armed='1';btn.textContent=txt;
+  setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent=old;}},4500);
+}
+
+/* ---------- 결과지 ---------- */
+const RCSS=`
+.r-doc{font-family:'Noto Sans KR','Malgun Gothic','맑은 고딕',sans-serif;color:#1b2030;font-size:10.5pt;line-height:1.55}
+.r-top{font-size:9pt;color:#6a7287;margin:0}
+.r-title{font-size:21pt;font-weight:700;color:#1e3f8f;margin:2pt 0 6pt}
+.r-sub{font-size:11pt;font-weight:700;margin:0 0 10pt}
+.r-sec{background:#1e3f8f;color:#fff;font-weight:700;padding:4pt 8pt;margin:14pt 0 4pt;font-size:11.5pt}
+.r-h{font-weight:700;color:#1e3f8f;margin:8pt 0 3pt;font-size:10.5pt}
+table.r-t{border-collapse:collapse;width:100%;margin:0 0 6pt}
+table.r-t td,table.r-t th{border:1px solid #cdd4e4;padding:4pt 6pt;vertical-align:top;text-align:left;font-size:9.5pt}
+table.r-t th{background:#eef2fa;font-weight:700}
+table.r-t td.l{background:#eef2fa;font-weight:700;width:26%}
+.r-empty{color:#9aa2b5}
+`;
+document.getElementById('rcss').textContent=RCSS;
+const ans=v=>has(v)?esc(v).replace(/\n/g,'<br>'):'<span class="r-empty">(미작성)</span>';
+function fieldVal(it){
+  if(it.type==='list')return R(it.n).map(i=>val(it.k+'_'+i)).map((v,i)=>has(v)?`${i+1}. ${v}`:'').filter(Boolean).join('\n');
+  if(it.type==='rate')return has(val(it.k))?'★'.repeat(+val(it.k))+'☆'.repeat(5-val(it.k))+`  (${val(it.k)}/5)`:'';
+  if(it.type==='chk')return (Array.isArray(D[it.k])?D[it.k]:[]).map(o=>'■ '+o).join('\n');
+  return val(it.k);
+}
+function resultBody(){
+  const today=new Date();const ds=`${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+  let h=`<div class="r-doc"><p class="r-top">나만의 커리어 로드맵</p><p class="r-title">나의 커리어로드맵 워크시트</p><p class="r-sub">${esc(val('name')||'(이름)')} · ${esc(val('major')||'(학과)')} ${esc(val('grade'))} · 작성일 ${ds}</p>`;
+  ST.slice(1).forEach(s=>{
+    h+=`<div class="r-sec">${esc(s.tag)} · ${esc(s.title)}</div>`;
+    s.blocks.forEach(b=>{
+      if(b.t==='h')h+=`<div class="r-h">${esc(b.title)}</div>`;
+      else if(b.t==='f'){h+='<table class="r-t">'+b.items.map(it=>`<tr><td class="l">${esc(it.l)}</td><td>${ans(fieldVal(it))}</td></tr>`).join('')+'</table>';}
+      else if(b.t==='g'){h+=(b.title?`<div class="r-h">${esc(b.title)}</div>`:'')+`<table class="r-t"><tr><th>항목</th>${b.cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>`+b.rows.map((r,ri)=>`<tr><td class="l">${esc(r)}</td>${b.cols.map((c,ci)=>`<td>${ans(val(b.gk+'_'+ri+'_'+ci))}</td>`).join('')}</tr>`).join('')+'</table>';}
+      else if(b.t==='gap'){h+='<table class="r-t"><tr><th>직무 필요 역량</th><th>필요 수준</th><th>현재 수준</th><th>갭</th><th>보완 방법</th></tr>'+R(GAP_N).map(i=>`<tr><td class="l">${ans(val('gap_'+i+'_name'))}</td><td>${ans(val('gap_'+i+'_need'))}</td><td>${ans(val('gap_'+i+'_cur'))}</td><td>${ans(gapVal(i))}</td><td>${ans(val('gap_'+i+'_plan'))}</td></tr>`).join('')+'</table>';}
+    });
+  });
+  return h+'</div>';
+}
+function missingCount(){return ST.slice(1).reduce((a,s)=>a+keysOf(s).filter(k=>!has(D[k])).length,0);}
+function promptList(){
+  const major=val('major')||'(  )',grade=val('grade')||'(  )';
+  return [
+   ['2-1 학습',`커리어로드맵 보고서를 만들꺼야. 나는 ${major} 전공, ${grade} 이야 먼저 업로드한 워크시트, eDISC 진단 결과지, 직무탐색 PDF, 경험큐레이션 PDF 학습해.`],
+   ['2-2 목표',`나의 진로 목표는 ${val('t_ind')||'(  )'}산업, ${val('t_co')||'(  )'}기업, ${val('t_job')||'(  )'}직무야.`],
+   ['2-3 액션플랜','액션플랜은 학년별로 4학년까지 분기 단위로 구체화해줘. 학년에 따라 \'이번 학기 안에 할 수 있는 작은 행동 3개\' 만들어줘.'],
+   ['2-4 보고서','이 내용들을 기준으로 나의 커리어로드맵 보고서를 만들어줘.']
+  ];
+}
+function resultView(){
+  const miss=missingCount();
+  const pr=promptList().map((p,i)=>`<div class="prompt"><div class="ph"><span>${esc(p[0])}</span><button type="button" class="btn ghost small" data-copy="${i}">복사</button></div><pre id="pr_${i}">${esc(p[1])}</pre></div>`).join('');
+  return `<div class="note">${miss?`아직 비어 있는 항목이 ${miss}개 있습니다. 빈 항목은 결과지에 "(미작성)"으로 표시됩니다.`:'모든 항목이 작성되었습니다.'}</div>
+  <h2>1. 결과지 내려받기</h2>
+  <div class="tools"><button type="button" class="btn" id="dlDoc">결과지 다운로드 (Word)</button><button type="button" class="btn ghost" id="dlTxt">텍스트로 다운로드 (.txt)</button><button type="button" class="btn ghost" id="dlJson">입력 내용 저장 (.json)</button><label class="btn ghost" style="display:inline-block">입력 내용 불러오기<input type="file" id="ldJson" accept=".json,application/json" hidden></label></div>
+  <div class="msg" id="dlMsg" role="status"></div>
+  <div class="note">AI에 올릴 때는 Word로 연 뒤 "PDF로 저장"해서 업로드하거나, 텍스트 파일을 그대로 올리세요. .json 파일은 같은 화면에서 이어서 작성할 때 쓰는 백업입니다.</div>
+  <h2>2. AI에 입력할 프롬프트 (순서대로 한 번씩)</h2>${pr}<div class="msg" id="cpMsg" role="status"></div>
+  <h2>3. 결과지 미리보기</h2><div class="paper" id="paper">${resultBody()}</div>`;
+}
+function say(id,t,err){const el=document.getElementById(id);if(el){el.textContent=t;el.className='msg'+(err?' err':'');}}
+function fname(ext){return `커리어로드맵_워크시트_${(val('name')||'이름').replace(/[\\/:*?"<>|\s]+/g,'')}.${ext}`;}
+async function saveFile(name,text,mime,msgId){
+  const blob=new Blob([text],{type:mime});
+  let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){}
+  if(!dl){try{const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);say(msgId,`${name} 다운로드를 시작했습니다. 내려받은 파일은 다운로드 폴더에 있습니다.`);}catch(e){say(msgId,'다운로드가 막혀 있습니다. 브라우저 설정에서 이 사이트의 다운로드를 허용해 주세요.',true);}return;}
+  try{await dl.save({filename:name,data:blob});say(msgId,`${name} 저장을 요청했습니다.`);}
+  catch(e){try{await dl.save({filename:name,data:text});say(msgId,`${name} 저장을 요청했습니다.`);}catch(e2){say(msgId,'저장이 취소되었거나 실패했습니다. 다시 눌러 주세요.',true);}}
+}
+function docHtml(){
+  return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>커리어로드맵 워크시트</title><!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml><![endif]--><style>@page{size:21cm 29.7cm;margin:1.8cm}body{font-family:'Malgun Gothic','맑은 고딕',sans-serif}${RCSS}</style></head><body>${resultBody()}</body></html>`;
+}
+function textDoc(){
+  let t=`나만의 커리어 로드맵 워크시트\n이름: ${val('name')}  /  학과: ${val('major')} ${val('grade')}\n`;
+  ST.slice(1).forEach(s=>{
+    t+=`\n==== ${s.tag} ${s.title} ====\n`;
+    s.blocks.forEach(b=>{
+      if(b.t==='h')t+=`\n[${b.title}]\n`;
+      else if(b.t==='f')b.items.forEach(it=>{t+=`- ${it.l}: ${fieldVal(it).replace(/\n/g,' / ')}\n`;});
+      else if(b.t==='g'){t+=`\n[${b.title||''}]\n`;b.rows.forEach((r,ri)=>{t+=`- ${r}: `+b.cols.map((c,ci)=>`${c}=${val(b.gk+'_'+ri+'_'+ci).replace(/\n/g,' ')}`).join(' | ')+'\n';});}
+      else if(b.t==='gap'){R(GAP_N).forEach(i=>{t+=`- 역량 ${i+1}: ${val('gap_'+i+'_name')} | 필요 ${val('gap_'+i+'_need')} | 현재 ${val('gap_'+i+'_cur')} | 갭 ${gapVal(i)} | 보완 ${val('gap_'+i+'_plan').replace(/\n/g,' ')}\n`;});}
+    });
+  });
+  return '﻿'+t;
+}
+function bindResult(){
+  document.getElementById('dlDoc').onclick=()=>saveFile(fname('doc'),'﻿'+docHtml(),'application/msword','dlMsg');
+  document.getElementById('dlTxt').onclick=()=>saveFile(fname('txt'),textDoc(),'text/plain;charset=utf-8','dlMsg');
+  document.getElementById('dlJson').onclick=()=>saveFile(fname('json'),JSON.stringify(D,null,1),'application/json','dlMsg');
+  document.getElementById('ldJson').onchange=ev=>{
+    const f=ev.target.files&&ev.target.files[0];if(!f)return;
+    const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(o&&typeof o==='object'){D=o;persist();renderMain();}else throw 0;}catch(e){say('dlMsg','읽을 수 없는 파일입니다. 이 화면에서 저장한 .json 파일을 선택하세요.',true);}};r.readAsText(f);
+  };
+  document.querySelectorAll('[data-copy]').forEach(b=>{b.onclick=async()=>{
+    const i=+b.dataset.copy,txt=promptList()[i][1];
+    try{await navigator.clipboard.writeText(txt);say('cpMsg',`${promptList()[i][0]} 프롬프트를 복사했습니다.`);}
+    catch(e){const pre=document.getElementById('pr_'+i);const rg=document.createRange();rg.selectNodeContents(pre);const sl=window.getSelection();sl.removeAllRanges();sl.addRange(rg);say('cpMsg','자동 복사가 막혀 있어 글자를 선택해 두었습니다. Ctrl+C(맥은 Cmd+C)로 복사하세요.',true);}
+  };});
+}
+
+/* ---------- 작성 예시 (가상 인물) ---------- */
+const EX={name:'홍길동',major:'경영학과',grade:'3학년',
+ w_goal:'① 전공 학점 3.8 이상 → 달성(3.85)\n② 마케팅 학회 활동 → 달성\n③ 마케팅 공모전 1회 출전 → 미달성(준비만 함)',
+ w_winter:'CJ ENM 콘텐츠 마케팅 인턴·직무 지원을 위한 포트폴리오(마케팅 분석 리포트 1건) 완성',
+ w_first:'CJ ENM 채용 사이트 알림 설정 + 마케팅 직무 공고 3개 저장하기',
+ c_self:'3',c_goal:'4',c_env:'2',c_act:'2',
+ edisc:'IC',animal:'공작새',
+ strong_0:'트렌드·사람에 대한 호기심이 높고 아이디어를 말로 설득함',strong_1:'근거·데이터를 꼼꼼히 확인하는 편',strong_2:'낯선 모임에서도 먼저 말을 거는 편',
+ weak_0:'마감 직전에 몰아서 하는 경향',weak_1:'세부 숫자에 집착해 결정이 늦어질 때가 있음',weak_2:'반대 의견 앞에서 말수가 줄어듦',
+ like:'영화·드라마·OTT, 팬덤·굿즈, 트렌드 콘텐츠 분석',senior:'소비재·식품, 유통, 광고대행사, 금융 (마케팅·영업·기획 직무)',daily:'티빙·유튜브·인스타그램, 올리브영, 배달앱',
+ kw:'콘텐츠 · 팬덤 · 트렌드 · 브랜딩 · 소비자 반응',indc_0:'미디어·콘텐츠(엔터)',indc_1:'소비재·뷰티 브랜드',indc_2:'광고·플랫폼',
+ t_ind:'미디어·콘텐츠',t_co:'CJ ENM',t_job:'마케팅',
+ smart:'2027년 상반기까지 마케팅 분석 리포트 1건과 공모전 1회를 포함한 포트폴리오를 완성하고, 4학년 공채 시즌에 CJ ENM 마케팅 직무에 지원한다.',
+ m_top_0:'마케팅 (콘텐츠·브랜드)',m_top_1:'기획 · 사업개발',m_top_2:'영업 · 세일즈',m_low_0:'생산 · 품질관리',m_low_1:'회계 · 세무',m_low_2:'연구개발(R&D)',
+ co:'CJ ENM (엔터테인먼트 부문)',co_jobs:'마케팅(콘텐츠·온라인), 편성·PD·제작, 사업개발, 해외 유통·세일즈, 재무·IR 등',
+ j_name:'마케팅 (CJ ENM 콘텐츠·온라인 마케팅)',j_why:'좋아하는 콘텐츠를 사람들이 실제로 보게 만드는 일이 궁금함. 전공(경영학) 지식을 가장 직접 쓸 수 있고, 학회 경험과도 연결됨.',
+ j_do_0:'콘텐츠(드라마·예능·영화) 홍보 전략과 캠페인 기획',j_do_1:'온라인·SNS·숏폼 채널 운영, 광고 집행(퍼포먼스)',j_do_2:'성과 데이터 분석 및 리포트',j_do_3:'제작·편성·플랫폼 등 유관 부서 협업',j_do_4:'광고주·파트너사 커뮤니케이션',
+ j_skill_0:'데이터 분석 (지식·기술): 엑셀, GA4 등',j_skill_1:'콘텐츠 기획·카피 (기술)',j_skill_2:'트렌드·소비자 이해 (지식)',j_skill_3:'협업·커뮤니케이션 (태도)',j_skill_4:'영어·글로벌 감각 (지식)',
+ j_enter:'공채 일반전형: 서류 → 직무테스트 → 면접 (공고별 상이, recruit.cj.net 확인). 마케팅 신입 공고는 퍼포먼스·온라인·콘텐츠 마케팅 등으로 나뉘어 나옴. 조기선발·인턴 등 별도 경로도 확인할 것.',
+ j_hard:'직무 경험이 없는 신입은 "왜 이 콘텐츠, 이 직무인가"를 포트폴리오(분석 리포트·활동 성과)로 보여 주어야 함. 데이터 분석 경험이 가장 큰 차이를 만듦.',
+ j_fit:'트렌드 관찰, 아이디어 발표, 사람들과 협업하는 것이 편함',j_worry:'데이터 분석 경험 부족, 영어 면접',
+ co_val:'ONLYONE · 하고잡이 (공식 채용 페이지에서 재확인)',co_hire:'공채 상·하반기, 서류 → 직무테스트 → 면접 (recruit.cj.net)',co_news:'2026년 2분기 흑자전환 보도 외 4건은 직접 검색해서 정리',co_ratio:'마케팅 신입·경력 공고 비율은 채용 사이트에서 직접 확인',
+ in_size:'콘텐츠산업 매출 약 157.4조 원, 방송·영상 약 25조 원 (한국콘텐츠진흥원, 연도 재확인)',in_trend:'OTT 경쟁, 숏폼·클립 마케팅, K-콘텐츠 해외 유통, 팬덤·IP 확장, AI 활용 제작',in_ai:'AI 추천·생성형 도구 도입, 저작권·초상권 이슈',in_future:'플랫폼 통합과 수익성 중심 재편 (내 의견, 근거 보완 필요)',
+ gap_0_name:'데이터 분석',gap_0_need:'5',gap_0_cur:'2',gap_0_plan:'GA4 인증 + 마케팅 분석 리포트 1건',
+ gap_1_name:'콘텐츠 기획·카피',gap_1_need:'4',gap_1_cur:'3',gap_1_plan:'콘텐츠 기획안 3건 작성 (학회 피드백)',
+ gap_2_name:'트렌드·소비자 이해',gap_2_need:'4',gap_2_cur:'4',gap_2_plan:'현 수준 유지: 콘텐츠 트렌드 노트 매주 1건',
+ gap_3_name:'협업·커뮤니케이션',gap_3_need:'4',gap_3_cur:'3',gap_3_plan:'공모전 팀 프로젝트에서 리더 역할 맡기',
+ gap_4_name:'영어·글로벌 감각',gap_4_need:'3',gap_4_cur:'2',gap_4_plan:'토익 850 + 영어 면접 스터디',
+ g_focus:'데이터 분석 역량 (갭 3): GA4 인증 + 마케팅 분석 리포트 1건',
+ x_types:['자격증 / 어학 / 전공 심화 학습','공모전 / 프로젝트'],
+ q_edisc:'IC (공작새 + 올빼미)',q_major:'경영학 / 부전공 없음',q_job:'CJ ENM 콘텐츠 마케팅',q_skill:'데이터 분석, 영어',
+ rec_0_0:'콘텐츠·브랜드 마케팅 공모전, 대학생 마케팅 서포터즈 (공고 확인)',rec_0_1:'아이디어와 소통 강점을 살리고 포트폴리오 성과가 남음',
+ rec_1_0:'GA4 인증 학습 + 교내 데이터분석 스터디',rec_1_1:'가장 큰 갭(데이터 분석)을 직접 줄이기 위해',
+ rec_2_0:'글로벌 콘텐츠·팬덤 사례 리서치 스터디',rec_2_1:'K-콘텐츠 해외 시장 감각을 키우고 싶어서',
+ cd_0_0:'경영학과',cd_0_1:'마케팅 전공심화 이수',cd_1_0:'3.85 / 3.9',cd_1_1:'4.0 / 4.0',
+ cd_2_0:'마케팅원론·소비자행동 이수, 통계 수강 중',cd_2_1:'마케팅조사론, 데이터분석 기초',cd_3_0:'없음',cd_3_1:'마케팅 공모전 2회 (입상 1회)',
+ cd_4_0:'컴퓨터활용능력 1급',cd_4_1:'GAIQ(GA4 인증)',cd_5_0:'교내 마케팅 학회 활동',cd_5_1:'콘텐츠 서포터즈 1회',
+ cd_6_0:'카페 8개월 (고객응대)',cd_6_1:'마케팅·콘텐츠 관련 인턴 1회',cd_7_0:'토익 780',cd_7_1:'토익 850, 영어 면접 대비',cd_8_0:'개인 영화 리뷰 SNS 계정 운영',cd_8_1:'분석 리포트 포트폴리오 정리',
+ ai_0_0:'미디어·콘텐츠, 소비재, 광고 3개 산업 추천. 검증: 한국콘텐츠진흥원 통계로 시장 규모 교차 확인',
+ ai_1_0:'미디어·콘텐츠 후보 기업 목록. 검증: 매출 순위는 DART 공시로 직접 확인 (AI 답 그대로 쓰지 않음)',
+ ai_2_0:'CJ ENM 마케팅·콘텐츠 기획·해외 유통 추천. 검증: 실제 채용 공고와 비교해 일부 불일치',
+ u_files:['워크시트 파일(결과지)','eDISC 결과지','직무분석 내용','경험'],
+ pl_0_0:'대학 적응, 전공 기초 학점 관리',pl_0_1:'진로 탐색 시작, 학회 활동',pl_0_2:'[지금] 직무 확정·갭 분석 → 겨울방학 인턴·포트폴리오',pl_0_3:'1학기: 공채 서류·직무테스트 / 여름: 면접 / 2학기: 보완',
+ pl_1_0:'경영학원론, 회계원리',pl_1_1:'마케팅원론, 통계',pl_1_2:'마케팅조사론, 데이터분석 기초',pl_1_3:'졸업 요건 마무리, 직무 심화',
+ pl_2_0:'컴퓨터활용능력 2급 (완료)',pl_2_1:'컴퓨터활용능력 1급 (완료)',pl_2_2:'GAIQ(GA4 인증): 겨울방학',pl_2_3:'토익 850 (필요 시 갱신)',
+ pl_3_0:'과 동기·선배 모임',pl_3_1:'마케팅 직무 선배 인터뷰 1회',pl_3_2:'CJ ENM 채용설명회·현직자 인터뷰 1회',pl_3_3:'면접 스터디 구성',
+ pl_4_0:'교내 마케팅 학회 가입',pl_4_1:'학회 운영진',pl_4_2:'공모전 1회 출전 (3학년 겨울~4학년 1학기)',pl_4_3:'후배 멘토링',
+ pl_5_0:'마케팅 입문서 1권',pl_5_1:'트렌드 분석서 1권',pl_5_2:'콘텐츠 산업·마케팅 사례서 2권',pl_5_3:'직무 면접 준비서',
+ pl_6_0:'장학금 + 교내 근로',pl_6_1:'카페 아르바이트',pl_6_2:'인턴 급여·장학금',pl_6_3:'저축 + 교내 장학금',
+ pl_7_0:'(완료)',pl_7_1:'토익 780',pl_7_2:'이번 학기 작은 행동 3개: ① 공고 3개 저장 ② GA4 학습 시작 ③ 선배 인터뷰 신청',pl_7_3:'최종 지원 포트폴리오 점검'};
+
+renderMain();
+</script>
+</body>
+</html>
